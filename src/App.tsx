@@ -10,19 +10,23 @@ const INITIAL_STATE: List = { items: [] };
 const ADD = "add" as const;
 const REMOVE = "remove" as const;
 const TOGGLE = "toggle" as const;
+const CLEAR = "clear" as const;
 
 const OPERATIONS = {
   ADD,
   REMOVE,
   TOGGLE,
+  CLEAR
 };
 
-const actions = [ADD, REMOVE, TOGGLE];
+const actions = Object.values(OPERATIONS);
 
 type Actions = typeof actions[number];
 
-function reducer(state: List, action: { type: Actions; payload: Item }): List {
+function reducer(state: List, action: { type: Actions; payload?: Item}): List {
   const { type, payload } = action;
+
+ 
 
   switch (type) {
     case ADD:
@@ -31,13 +35,21 @@ function reducer(state: List, action: { type: Actions; payload: Item }): List {
         items: [...state.items, { ...payload, id: uniqueId, isCompleted: false }],
       };
     case REMOVE:
+      if(!payload){
+        return state
+      }
       return { items: state.items.filter((item) => item.id !== payload.id) };
     case TOGGLE:
+      if(!payload){
+        return state
+      }
       const itemIndex = state.items.findIndex((item) => item.id === payload.id);
       state.items[itemIndex].isCompleted = payload.isCompleted;
       return {
         items: state.items,
       };
+    case CLEAR:
+      return {items: []}
     default:
       return state;
   }
@@ -105,6 +117,13 @@ function App() {
           }}
         >
           Add
+        </button>
+        <button
+          onClick={() => {
+              dispatch({ type: OPERATIONS.CLEAR });
+          }}
+        >
+          Clear All
         </button>
       </div>
     </>

@@ -1,3 +1,13 @@
+# Pre-reqs
+
+Make sure your current Node version is on a stable verison
+
+If using nvm, run `nvm use stable`
+
+# Purpose
+
+To Learn more about the useReducer hook
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

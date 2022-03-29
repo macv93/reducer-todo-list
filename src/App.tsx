@@ -1,11 +1,19 @@
+import Icon, {
+  BulbTwoTone,
+  ClearOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { Button, Input, List } from "antd";
 import React, { useReducer, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./App.css";
 
 type Item = { name?: string; id?: string; isCompleted?: boolean };
-type List = { items: Item[] };
+type ListItems = { items: Item[] };
 
-const INITIAL_STATE: List = { items: [] };
+const INITIAL_STATE: ListItems = {
+  items: [{ name: "Add your own items to the list", isCompleted: false }],
+};
 
 const ADD = "add" as const;
 const REMOVE = "remove" as const;
@@ -16,32 +24,36 @@ const OPERATIONS = {
   ADD,
   REMOVE,
   TOGGLE,
-  CLEAR
+  CLEAR,
 };
 
 const actions = Object.values(OPERATIONS);
 
 type Actions = typeof actions[number];
 
-function reducer(state: List, action: { type: Actions; payload?: Item}): List {
+function reducer(
+  state: ListItems,
+  action: { type: Actions; payload?: Item }
+): ListItems {
   const { type, payload } = action;
-
- 
 
   switch (type) {
     case ADD:
       let uniqueId = uuidv4();
       return {
-        items: [...state.items, { ...payload, id: uniqueId, isCompleted: false }],
+        items: [
+          ...state.items,
+          { ...payload, id: uniqueId, isCompleted: false },
+        ],
       };
     case REMOVE:
-      if(!payload){
-        return state
+      if (!payload) {
+        return state;
       }
       return { items: state.items.filter((item) => item.id !== payload.id) };
     case TOGGLE:
-      if(!payload){
-        return state
+      if (!payload) {
+        return state;
       }
       const itemIndex = state.items.findIndex((item) => item.id === payload.id);
       state.items[itemIndex].isCompleted = payload.isCompleted;
@@ -49,7 +61,7 @@ function reducer(state: List, action: { type: Actions; payload?: Item}): List {
         items: state.items,
       };
     case CLEAR:
-      return {items: []}
+      return { items: [] };
     default:
       return state;
   }
@@ -70,13 +82,15 @@ function App() {
       cleanUp();
     }
   };
-  
+
   return (
     <>
       <div className="App">
-        <div>List</div>
-        <input
+        <div>My todo-list</div>
+        <Input
+          size="large"
           type="text"
+          placeholder="What do you need to get done today?"
           required
           value={input}
           onChange={(e) => {
@@ -86,29 +100,38 @@ function App() {
             onEnter(e);
           }}
         />
-        <ul>
-          {items.length &&
-            items.map(({ name, id, isCompleted }) => (
-              <li key={`${uuidv4()}`}>
+
+        <List
+          bordered
+          locale={{ emptyText: <BulbTwoTone /> }}
+          dataSource={items}
+          renderItem={({ name, id, isCompleted }) => (
+            <>
+              <List.Item>
                 <input
                   type="checkbox"
                   checked={isCompleted}
                   onChange={(e) => {
-                    dispatch({ type: OPERATIONS.TOGGLE, payload: { id, isCompleted: e.target.checked} });
+                    dispatch({
+                      type: OPERATIONS.TOGGLE,
+                      payload: { id, isCompleted: e.target.checked },
+                    });
                   }}
                 />
-                {isCompleted ? <s>{name}</s> : <span>{name}</span> }
-                <button
+                {isCompleted ? <s>{name}</s> : <span>{name}</span>}
+                <Button
                   onClick={() => {
                     dispatch({ type: OPERATIONS.REMOVE, payload: { id } });
                   }}
                 >
-                  X
-                </button>
-              </li>
-            ))}
-        </ul>
-        <button
+                  <DeleteOutlined />
+                </Button>
+              </List.Item>
+            </>
+          )}
+        />
+
+        <Button
           onClick={() => {
             if (input) {
               dispatch({ type: OPERATIONS.ADD, payload: { name: input } });
@@ -117,14 +140,16 @@ function App() {
           }}
         >
           Add
-        </button>
-        <button
-          onClick={() => {
+        </Button>
+        <Button>
+          <ClearOutlined
+            onClick={() => {
               dispatch({ type: OPERATIONS.CLEAR });
-          }}
-        >
-          Clear All
-        </button>
+            }}
+          >
+            Clear All
+          </ClearOutlined>
+        </Button>
       </div>
     </>
   );
